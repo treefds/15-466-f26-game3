@@ -23,7 +23,9 @@ struct PlayMode : Mode {
 	struct Button {
 		uint8_t downs = 0;
 		uint8_t pressed = 0;
-	} left, right, down, up;
+	} left, right, down, up, debug, space;
+
+	std::vector<int> key_presses; // A to Z
 
 	//local copy of the game scene (so code can change it during gameplay):
 	Scene scene;
@@ -48,4 +50,52 @@ struct PlayMode : Mode {
 	//camera:
 	Scene::Camera *camera = nullptr;
 
+	// ===== rhythm game stuff =======
+
+	// preloaded image
+	std::vector< glm::u8vec4 > alphabet_image;
+	// objects
+	Scene::Drawable *player = nullptr;
+	Scene::Drawable *enemy = nullptr;
+	Scene::Drawable *note_anchor = nullptr;
+
+	// The Note struct. defines a music note and its visual reference
+	struct Note {
+		// drawable
+		Scene::Drawable *drawable;
+		// #beats until landing.
+		float life = 8.0f;
+		// timer
+		float hit_timer = 0.0f;
+		// tint
+		glm::vec4 tint;
+		// result
+		int result = 0;   // 0 = miss, 1 = bad, 2 = great, 3 = perfect
+		// The letter to be shown
+		char letter = ' ';
+		bool consumed = false;
+	};
+
+	// List of all current notes
+	std::list<Note> notes;
+
+	// Method to add a new note
+	void add_note(char letter);
+
+	// BPM
+	float bpm = 120.0f;
+	// current soundtrack time
+	float curr_time = 0.0f;
+	// most recent note timestamp
+	float most_recent_note_time = -1.0f;
+	// notes played
+	size_t notes_played = 0;
+
+	// Game statistics
+	int num_bad = 0;
+	int num_miss = 0;
+	int num_great = 0;
+	int num_perfect = 0;
 };
+
+const float CIRCLE_RADIUS = 2.0f;

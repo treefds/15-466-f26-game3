@@ -1,0 +1,54 @@
+{
+	"track": "song.mp3",
+    "bpm": 120,
+    "chart": [
+        {
+            "beats": [],
+            "words": []
+        },
+        {
+            "beats": [],
+            "words": []
+        },
+        {
+            "beats": [0.0, 2.0, 4.0],
+    		"words": ["cat", "bee", "cow", "dog", "fox"]
+        },
+        {
+            "beats": [0.0, 2.0, 4.0],
+    		"words": ["pea", "nut", "ham", "jam", "oat", "egg"]
+        },
+        {
+            "beats": [0.0, 2.0, 3.0, 4.0],
+            "words": ["java", "rust", "bash", "ruby"]
+        },
+        {
+            "beats": [0.0, 2.0, 3.0, 4.0, 6.0],
+            "words": ["magic", "lyric", "hymns", "spell", "curse", "torch", "light", "music", "dream"]
+        },
+        {
+            "beats": [0.0, 1.5, 3.0, 5.5, 6.0, 7.0],
+            "words": ["defend", "attack", "pocket", "escape", "accept", "cancel"]
+        },
+        {
+            "beats": [0.0, 1.0, 3.0, 4.0, 5.0, 5.5],
+            "words": ["rapper", "bemani", "rhythm", "heaven", "doctor", "maimai", "deluxe", "guitar", "master", "garupa", "arcaea"]
+        },
+        {
+            "beats": [0.0, 1.5, 2.0, 3.5, 4.0, 5.0, 7.0],
+            "words": ["trumpet", "cymbals", "cowbell", "bagpipe", "bassoon", "bombard", "cornett", "ocarina", "marimba"]
+        },
+        {
+            "beats": [0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 6.0, 7.0],
+            "words": ["obliterate", "regenerate", "popularize", "translator"]
+        },
+        {
+            "beats": [0.0, 0.75, 1.5, 2.0, 3.0, 4.0, 4.75, 5.5, 6.25, 7.0, 7.5],
+            "words": ["translation", "calibration", "exaggerated", "fluctuation"]
+        },
+        {
+            "beats": [0.0, 0.5, 0.75, 1.25, 2.0, 2.5, 2.75, 3.25, 4.0, 4.5, 4.75, 5.25, 6.0, 7.0],
+            "words": ["triangularized", "backpropagated"]
+        }
+    ]
+}

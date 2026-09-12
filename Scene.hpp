@@ -79,6 +79,7 @@ struct Scene {
 				GLenum target = GL_TEXTURE_2D;
 			} textures[TextureCount];
 		} pipeline;
+		bool blended = false;
 	};
 
 	struct Camera {

@@ -41,10 +41,10 @@ int main(int argc, char **argv) {
 			std::cout << "WARNING: code page is set to " << code_page << " instead of 65001 (UTF-8). Some file handling functions may fail." << std::endl;
 		}
 	}
-
-	//when compiled on windows, unhandled exceptions don't have their message printed, which can make debugging simple issues difficult.
-	try {
 #endif
+	//when compiled on windows (AND macOS), unhandled exceptions don't have their message printed, which can make debugging simple issues difficult.
+	try {
+
 
 	//------------  initialization ------------
 
@@ -210,7 +210,6 @@ int main(int argc, char **argv) {
 
 	return 0;
 
-#ifdef _WIN32
 	} catch (std::exception const &e) {
 		std::cerr << "Unhandled exception:\n" << e.what() << std::endl;
 		return 1;
@@ -218,5 +217,4 @@ int main(int argc, char **argv) {
 		std::cerr << "Unhandled exception (unknown type)." << std::endl;
 		throw;
 	}
-#endif
 }

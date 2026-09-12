@@ -1,0 +1,5 @@
+{
+    "Player": ["Player.png", 256],
+    "Enemy": ["Player.png", 256],
+    "Plane": ["circle.png", 64]
+}

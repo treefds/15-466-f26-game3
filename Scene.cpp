@@ -89,8 +89,29 @@ void Scene::draw(Camera const &camera) const {
 
 void Scene::draw(glm::mat4 const &clip_from_world, glm::mat4x3 const &light_from_world) const {
 
-	//Iterate through all drawables, sending each one to OpenGL:
+
+	std::vector<Scene::Drawable const *> all_drawables(0);
+	std::vector<Scene::Drawable const *> blended_drawables(0);
+	size_t count_opaque = 0;
+	// Iterate through drawables, add them to corresponding drawable list
+	// Based on some hardcoded name matching?
 	for (auto const &drawable : drawables) {
+		// There is a custom flag in drawable, blended, saying whether it should be blended
+		if (drawable.blended) {
+			blended_drawables.emplace_back(&drawable);
+		} else {
+			all_drawables.emplace_back(&drawable);
+		}
+	}
+	// Add blended ones to the tail of all drawables
+	count_opaque = all_drawables.size();
+	all_drawables.insert(all_drawables.end(), blended_drawables.begin(), blended_drawables.end());
+
+	//Iterate through all drawables, sending each one to OpenGL:
+	size_t idx = 0;
+	for (auto const *drawable_ptr : all_drawables) {
+		auto const &drawable = *drawable_ptr;
+		++idx;
 		//Reference to drawable's pipeline for convenience:
 		Scene::Drawable::Pipeline const &pipeline = drawable.pipeline;
 
@@ -145,8 +166,24 @@ void Scene::draw(glm::mat4 const &clip_from_world, glm::mat4x3 const &light_from
 			}
 		}
 
+		// Enable blend if non-opaque
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		if (idx > count_opaque) {
+			glEnable(GL_BLEND);
+			glDepthMask(GL_FALSE);
+		} else {
+			glDisable(GL_BLEND);
+			glDepthMask(GL_TRUE);
+		}
+
 		//draw the object:
 		glDrawArrays(pipeline.type, pipeline.start, pipeline.count);
+
+		// Disable blend if non-opaque
+		if (idx > count_opaque) {
+			glDisable(GL_BLEND);
+			glDepthMask(GL_TRUE);
+		}
 
 		//un-bind textures:
 		for (uint32_t i = 0; i < Drawable::Pipeline::TextureCount; ++i) {

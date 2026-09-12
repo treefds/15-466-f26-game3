@@ -69,6 +69,7 @@ LitColorTextureProgram::LitColorTextureProgram() {
 	,
 		//fragment shader:
 		"#version 330\n"
+		"uniform vec4 TINT = vec4(1.0f, 1.0f, 1.0f, 1.0f);\n"
 		"uniform sampler2D TEX;\n"
 		"uniform int LIGHT_TYPE;\n"
 		"uniform vec3 LIGHT_LOCATION;\n"
@@ -105,7 +106,7 @@ LitColorTextureProgram::LitColorTextureProgram() {
 		"	} else { //(LIGHT_TYPE == 3) //directional light \n"
 		"		e = max(0.0, dot(n,-LIGHT_DIRECTION)) * LIGHT_ENERGY;\n"
 		"	}\n"
-		"	vec4 albedo = texture(TEX, texCoord) * color;\n"
+		"	vec4 albedo = texture(TEX, texCoord) * color * TINT;\n"
 		"	fragColor = vec4(e*albedo.rgb, albedo.a);\n"
 		/* DEBUG: check color output linearity:
 		"	float t = random(gl_FragCoord.xy/1280.0);\n"
@@ -135,6 +136,7 @@ LitColorTextureProgram::LitColorTextureProgram() {
 	CLIP_FROM_OBJECT_mat4 = glGetUniformLocation(program, "CLIP_FROM_OBJECT");
 	LIGHT_FROM_OBJECT_mat4x3 = glGetUniformLocation(program, "LIGHT_FROM_OBJECT");
 	LIGHT_FROM_NORMAL_mat3 = glGetUniformLocation(program, "LIGHT_FROM_NORMAL");
+	TINT_vec4 = glGetUniformLocation(program, "TINT");
 
 	LIGHT_TYPE_int = glGetUniformLocation(program, "LIGHT_TYPE");
 	LIGHT_LOCATION_vec3 = glGetUniformLocation(program, "LIGHT_LOCATION");
