@@ -2,13 +2,13 @@
 
 **Author**: Runkun Chen (runkunc)
 
-A typing rhythm game inspired by *PaRappa the Rapper* and typing games.
+A typing rhythm game, inspired by *PaRappa the Rapper* and typing games; mixing both into a somewhat unconventional rhythm game design.
 
 You are a mage fighting a slime. But to cast magic, you have to spell out words in sync with some rhythm.
 
 **Screenshot**:
 
-![Screen Shot](screenshot.png)
+![Screen Shot](media/screenshot.png)
 
 **How To Play**:
 
@@ -19,7 +19,7 @@ You are a mage fighting a slime. But to cast magic, you have to spell out words 
 
 **Known issues**:
 - Game will automatically start; to replay, please restart the program.
-- If the OS is unstable (dropping a lot of frames at once), then some notes will disappear.
+- If the OS is unstable (dropping a lot of frames at once), then some notes will disappear, and keys will become desynchronized.
 
 -----
 
