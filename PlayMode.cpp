@@ -1,6 +1,7 @@
 #include "PlayMode.hpp"
 
 #include "LitColorTextureProgram.hpp"
+#include "ColorTextureProgram.hpp"
 
 #include "DrawLines.hpp"
 #include "Mesh.hpp"
@@ -42,6 +43,7 @@ Load< Scene > cave_scene(LoadTagDefault, []() -> Scene const * {
 		// need a default uniform so other pieces don't get overwritten
 		drawable.pipeline.set_uniforms = []() {
 			glUniform4fv(lit_color_texture_program->TINT_vec4, 1, glm::value_ptr(glm::vec4(1.0f)));
+			glUniform3f(lit_color_texture_program->LIGHT_DIRECTION_vec3, 0.0f, 0.0f, -1.0f);
 		};
 
 		// For Player and Enemy, we want to change the texture
@@ -68,8 +70,14 @@ Load< Scene > cave_scene(LoadTagDefault, []() -> Scene const * {
 			drawable.pipeline.textures[0].texture = tex;
 			drawable.pipeline.textures[0].target = GL_TEXTURE_2D;
 			drawable.blended = true;
-		}
 
+			drawable.pipeline.set_uniforms = []() {
+				glUniform4fv(lit_color_texture_program->TINT_vec4, 1, glm::value_ptr(glm::vec4(1.0f)));
+				glUniform1i(lit_color_texture_program->LIGHT_TYPE_int, 1);
+				glUniform3f(lit_color_texture_program->LIGHT_DIRECTION_vec3, -1.0f, 0.0f, 0.0f);
+				glUniform3f(lit_color_texture_program->LIGHT_ENERGY_vec3, 1.0f, 1.0f, 1.0f);
+			};
+		}
 	});
 });
 
@@ -107,14 +115,33 @@ PlayMode::PlayMode() : scene(*cave_scene) {
 		if (drawable.transform->name == "Player") player = &drawable;
 		else if (drawable.transform->name == "Enemy") enemy = &drawable;
 		else if (drawable.transform->name == "Anchor") note_anchor = &drawable;
+		else if (drawable.transform->name == "Circle") note_circle = &drawable;
+		else if (drawable.transform->name == "Effect") lightning = &drawable;
 	}
 	if (player == nullptr) throw std::runtime_error("Player not found.");
 	if (enemy == nullptr) throw std::runtime_error("Enemy not found.");
 	if (note_anchor == nullptr) throw std::runtime_error("Anchor not found.");
+	if (note_circle == nullptr) throw std::runtime_error("Circle not found.");
+	if (lightning == nullptr) throw std::runtime_error("Lightning not found.");
+
+	// Initialize base positions
+	player_base_pos = player->transform->position;
+	enemy_base_pos = enemy->transform->position;
+
+	// override lightning uniforms setter
+	lightning->pipeline.set_uniforms = [this]() {
+		glUniform4fv(lit_color_texture_program->TINT_vec4, 1, glm::value_ptr(glm::vec4(1.0f, 1.0f, 1.0f, 3.0f * this->lightning_timer)));
+		glUniform3f(lit_color_texture_program->LIGHT_DIRECTION_vec3, 0.0f, 0.0f, 0.0f);
+	};
+
+	enemy->pipeline.set_uniforms = [this]() {
+		glUniform4fv(lit_color_texture_program->TINT_vec4, 1, glm::value_ptr(glm::vec4(1.0f, 1.0f, 1.0f, 3.0f * this->enemy_fade)));
+		glUniform3f(lit_color_texture_program->LIGHT_DIRECTION_vec3, 0.0f, 0.0f, 0.0f);
+	};
 
 	//start music loop playing:
 	// (note: position will be over-ridden in update())
-	leg_tip_loop = Sound::loop_3D(*song_sample, 1.0f, glm::vec3(0.0f), 10.0f);
+	leg_tip_loop = Sound::play(*song_sample, 1.0f);
 
 	// Load image
 	glm::uvec2 loc({512, 256});
@@ -125,6 +152,10 @@ PlayMode::PlayMode() : scene(*cave_scene) {
 	for (auto &v: key_presses) {
 		v = 0;
 	}
+
+	// Random seed
+	std::srand(std::time(nullptr));
+	start = std::chrono::steady_clock::now();
 }
 
 PlayMode::~PlayMode() {
@@ -184,8 +215,6 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 			down.pressed = true;
 			return true;
 		} else if (evt.key.key == SDLK_SPACE) {
-			if (honk_oneshot) honk_oneshot->stop();
-			honk_oneshot = Sound::play_3D(*honk_sample, 0.3f, glm::vec3(4.6f, -7.8f, 6.9f)); //hardcoded position of front of car, from blender
 			space.downs += 1;
 			space.pressed = true;
 			return true;
@@ -241,6 +270,28 @@ void PlayMode::update(float elapsed) {
 		}
 	}
 
+	{ // Generate notes based on soundtrack
+		curr_time = std::chrono::duration<float>(std::chrono::steady_clock::now() - start).count();
+		// curr_time += elapsed;
+		float beats_passed = (curr_time + 0.001f) / 60.0f * bpm;
+		if (std::floor(beats_passed / 16.0f) != std::floor((curr_time - elapsed + 0.001f) / 60.0f * bpm / 16.0f)) {
+			// new round
+			current_round_played = 0;
+			current_round_bad = 0;
+			size_t _curr_sel = std::clamp(static_cast<size_t>(beats_passed / 16.0f), 0ul, Chart::SONG_NUM_ROUNDS - 1);
+			word_index = std::rand() % Chart::chart_words[_curr_sel].size();
+		}
+		size_t current_section = std::clamp(static_cast<size_t>(beats_passed / 16.0f), 0ul, Chart::SONG_NUM_ROUNDS);
+		float delta_beats_passed = beats_passed - std::floor(beats_passed / 16.0f) * 16.0f;
+		if (current_section < Chart::SONG_NUM_ROUNDS && current_round_played < Chart::chart_beats[current_section].size()) {
+			if (Chart::chart_beats[current_section][current_round_played] <= delta_beats_passed) {
+				// Play this beat
+				current_round_played++;
+				add_note(Chart::chart_words[current_section][word_index][current_round_played - 1]);
+			}
+		}
+	}
+
 	{ //Handle note positions and note hantei
 		Note *next_note = nullptr;
 		for (Note &note: notes) {
@@ -254,6 +305,11 @@ void PlayMode::update(float elapsed) {
 				} else if (next_note->life > note.life) {
 					next_note = &note;
 				}
+			}
+			if (note.life < -0.25f && !note.consumed) {
+				note.consumed = true;
+				current_round_bad++;
+				num_miss += 1;
 			}
 
 			// Change position based on note life
@@ -293,12 +349,15 @@ void PlayMode::update(float elapsed) {
 						next_note->tint.r = 0.3f;
 						if (honk_oneshot) honk_oneshot->stop();
 						honk_oneshot = Sound::play_3D(*sfx_bad_sample, 0.6f, glm::vec3(0.0f, 0.0f, 0.0f));
+						current_round_bad++;
 						num_miss++;
 					} else if (time_diff < 0.08f && time_diff > -0.06f) { // HANTEI
 						next_note->tint.b = 0.5f;
 						next_note->result = 3;
 						if (honk_oneshot) honk_oneshot->stop();
 						honk_oneshot = Sound::play_3D(*sfx_perfect_sample, 0.6f, glm::vec3(0.0f, 0.0f, 0.0f));
+						press_timer = 0.07f;
+						lightning_timer = 0.2f;
 						num_perfect++;
 					} else if (time_diff < 0.12f && time_diff > -0.10f) {
 						next_note->tint.r = 0.4f;
@@ -306,6 +365,8 @@ void PlayMode::update(float elapsed) {
 						next_note->result = 2;
 						if (honk_oneshot) honk_oneshot->stop();
 						honk_oneshot = Sound::play_3D(*sfx_great_sample, 0.6f, glm::vec3(0.0f, 0.0f, 0.0f));
+						press_timer = 0.055f;
+						lightning_timer = 0.15f;
 						num_great++;
 					} else {
 						next_note->tint.g = 0.4f;
@@ -313,12 +374,51 @@ void PlayMode::update(float elapsed) {
 						next_note->result = 1;
 						if (honk_oneshot) honk_oneshot->stop();
 						honk_oneshot = Sound::play_3D(*sfx_bad_sample, 0.6f, glm::vec3(0.0f, 0.0f, 0.0f));
+						press_timer = 0.04f;
+						current_round_bad++;
 						num_bad++;
 					}
 					break;
 				}
 			}
 		}
+	}
+
+	{ // animate cursor/hanteisen/lightning/stretch and squeeze
+		press_timer = std::clamp(press_timer - elapsed, 0.0f, 1.0f);
+		lightning_timer = std::clamp(lightning_timer - elapsed, 0.0f, 0.2f);
+		note_circle->transform->scale = glm::vec3(0.4f + press_timer);
+		
+		// this only works on 120 BPM!!!
+		float beat_delta = 0.25f - (curr_time - std::floor(curr_time));
+
+		// player squeeze
+		float squeeze_timer = std::max(beat_delta, lightning_timer);
+		player->transform->scale.y = 1.0f - glm::sin(squeeze_timer / 0.25f * PI) * 0.04f;
+		enemy->transform->scale.y = 1.0f - glm::sin(squeeze_timer / 0.25f * PI) * 0.04f;
+		
+		// ememy hit?
+		enemy->transform->position.y = enemy_base_pos.y + glm::sin(lightning_timer / 0.25f * PI) * 0.07f;
+		player->transform->position.y = player_base_pos.y;
+	}
+
+	{ // animate enemy transition
+		float beats_passed = (curr_time + 0.001f) / 60.0f * bpm;
+		// in mod 16
+		beats_passed = beats_passed - std::floor(beats_passed / 16.0f) * 16.0f;
+		// if beats_passed > 15.25f, we can then calculate the expected animations
+
+		if (current_round_bad > 0 && beats_passed > 14.5f) {
+			// hitting the player
+			enemy->transform->position.y -= 0.75f * 0.75f * 6.0f - (15.25f - beats_passed) * (15.25f - beats_passed) * 6.0f;
+			player->transform->position.y -= 0.75f * 0.75f * 1.0f - (15.25f - beats_passed) * (15.25f - beats_passed) * 1.0f;
+		}
+
+		if (curr_time > 99.0f) {
+			enemy->transform->rotation = glm::slerp(enemy->transform->rotation, glm::quat(glm::vec3(0.0f, 0.0f, 0.7f * PI / 2.0f)), elapsed * 2.0f);
+			gameover = true;
+		}
+
 	}
 
 	//reset button press counters:
@@ -348,7 +448,7 @@ void PlayMode::draw(glm::uvec2 const &drawable_size) {
 	glUniform3fv(lit_color_texture_program->LIGHT_ENERGY_vec3, 1, glm::value_ptr(glm::vec3(1.0f, 1.0f, 0.95f)));
 	glUseProgram(0);
 
-	glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
+	glClearColor(0.0f, 0.1f, 0.2f, 1.0f);
 	glClearDepth(1.0f); //1.0 is actually the default value to clear the depth buffer to, but FYI you can change it.
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -367,13 +467,19 @@ void PlayMode::draw(glm::uvec2 const &drawable_size) {
 			0.0f, 0.0f, 0.0f, 1.0f
 		));
 
-		constexpr float H = 0.09f;
-		lines.draw_text("Mouse motion rotates camera; WASD moves; escape ungrabs mouse",
+		std::string text = "Type in the letter when it overlaps with the circle";
+
+		if (gameover) {
+			text = "PERFECT " + std::to_string(num_perfect) + " * GREAT " + std::to_string(num_great) + " * BAD " + std::to_string(num_bad) 
+			     + " * MISS" + std::to_string(num_miss); 
+		}
+		constexpr float H = 0.16f;
+		lines.draw_text(text,
 			glm::vec3(-aspect + 0.1f * H, -1.0 + 0.1f * H, 0.0),
 			glm::vec3(H, 0.0f, 0.0f), glm::vec3(0.0f, H, 0.0f),
 			glm::u8vec4(0x00, 0x00, 0x00, 0x00));
 		float ofs = 2.0f / drawable_size.y;
-		lines.draw_text("Mouse motion rotates camera; WASD moves; escape ungrabs mouse",
+		lines.draw_text(text,
 			glm::vec3(-aspect + 0.1f * H + ofs, -1.0 + + 0.1f * H + ofs, 0.0),
 			glm::vec3(H, 0.0f, 0.0f), glm::vec3(0.0f, H, 0.0f),
 			glm::u8vec4(0xff, 0xff, 0xff, 0x00));
@@ -448,6 +554,7 @@ void PlayMode::add_note(char letter) {
 	// Set uniforms to modulate color
 	drawable.pipeline.set_uniforms = [note]() {
 		glUniform4fv(lit_color_texture_program->TINT_vec4, 1, glm::value_ptr(note->tint));
+		glUniform3f(lit_color_texture_program->LIGHT_DIRECTION_vec3, 0.0f, 0.0f, 0.0f);
 	};
 
 }

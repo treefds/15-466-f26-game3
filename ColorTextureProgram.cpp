@@ -25,6 +25,7 @@ ColorTextureProgram::ColorTextureProgram() {
 		//fragment shader:
 		"#version 330\n"
 		"uniform sampler2D TEX;\n"
+		"uniform vec4 TINT = vec4(1.0f, 1.0f, 1.0f, 1.0f);\n"
 		"in vec4 color;\n"
 		"in vec2 texCoord;\n"
 		"out vec4 fragColor;\n"

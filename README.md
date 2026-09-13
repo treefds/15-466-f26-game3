@@ -1,15 +1,31 @@
-# (TODO: your game's title)
+# Incantyper
 
-Author: (TODO: your name)
+**Author**: Runkun Chen (runkunc)
 
-Design: (TODO: In two sentences or fewer, describe what is new and interesting about your game.)
+A typing rhythm game inspired by *PaRappa the Rapper* and typing games.
 
-Screen Shot:
+You are a mage fighting a slime. But to cast magic, you have to spell out words in sync with some rhythm.
+
+**Screenshot**:
 
 ![Screen Shot](screenshot.png)
 
-How To Play:
+**How To Play**:
 
-(TODO: describe the controls and (if needed) goals/strategy.)
+- Use keyboard to type in letters;
+- when the letter overlaps with the circle in the center, hit the key;
+- the more precise the better;
+- the music alternates between two instrumental parts with the exact same rhythm. So try follow it.
+
+**Known issues**:
+- Game will automatically start; to replay, please restart the program.
+- If the OS is unstable (dropping a lot of frames at once), then some notes will disappear.
+
+-----
+
+3D assets created in Blender.
+2D assets drawn in Aseprite.
+Music composed in GarageBand, with Vital for synths.
+Word list partially taken from Dictionary.com.
 
 This game was built with [NEST](NEST.md).

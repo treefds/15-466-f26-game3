@@ -16,7 +16,7 @@ const size_t SONG_NUM_ROUNDS = 12;
 // The Chart
 std::vector<std::vector<float>> chart_beats = {
 	{},
-	{},
+	{0.0, 4.0},
 	{0.0, 2.0, 4.0},
 	{0.0, 2.0, 4.0},
 	{0.0, 2.0, 3.0, 4.0},
@@ -32,30 +32,32 @@ std::vector<std::vector<float>> chart_beats = {
 // Word list
 std::vector<std::vector<std::string>> chart_words = {
 	{},
-	{},
+	{"ok"},
 	{"cat", "bee", "cow", "dog", "fox"},
 	{"pea", "nut", "ham", "jam", "oat", "egg"},
 	{"java", "rust", "bash", "ruby"},
-	{"magic", "lyric", "hymns", "spell", "curse", "torch", "light", "music", "dream"},
+	{"magic", "lyric", "hymns", "spell", "curse", "torch", "light", "music", "dream", "fable"},
 	{"defend", "attack", "pocket", "escape", "accept", "cancel"},
 	{"rapper", "bemani", "rhythm", "heaven", "doctor", "maimai", "deluxe", "guitar", "master", "garupa", "arcaea"},
 	{"trumpet", "cymbals", "cowbell", "bagpipe", "bassoon", "bombard", "cornett", "ocarina", "marimba"},
-	{"obliterate", "regenerate", "popularize", "translator"},
-	{"translation", "calibration", "exaggerated", "fluctuation"},
-	{"triangularized", "backpropagated"},
+	{"obliterate", "regenerate", "popularize", "translator", "identifier", "encryption", "crystalize", "bottleneck"},
+	{"spectacular", "calibration", "exaggerated", "fluctuation", "subroutines"},
+	{"triangularized", "backpropagated", "abstractedness", "cardiovascular", "capitalisation", "fathomlessness"},
 };
 
 // Sprite helper
 std::unordered_map<std::string, std::string> mesh_name_to_sprite = {
 	{"Player", "Player.png"},
-	{"Enemy", "Player.png"},
+	{"Enemy", "Slime.png"},
 	{"Plane", "circle.png"},
+	{"Effect", "lightning.png"},
 };
 
 std::unordered_map<std::string, size_t> mesh_name_to_width = {
 	{"Player", 256},
 	{"Enemy", 256},
 	{"Plane", 64},
+	{"Effect", 256},
 };
 
 }

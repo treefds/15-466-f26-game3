@@ -1,5 +1,6 @@
 {
     "Player": ["Player.png", 256],
-    "Enemy": ["Player.png", 256],
-    "Plane": ["circle.png", 64]
+    "Enemy": ["Slime.png", 256],
+    "Plane": ["circle.png", 64],
+    "Effect": ["lightning.png", 256]
 }

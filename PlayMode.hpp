@@ -58,6 +58,8 @@ struct PlayMode : Mode {
 	Scene::Drawable *player = nullptr;
 	Scene::Drawable *enemy = nullptr;
 	Scene::Drawable *note_anchor = nullptr;
+	Scene::Drawable *note_circle = nullptr;
+	Scene::Drawable *lightning = nullptr;
 
 	// The Note struct. defines a music note and its visual reference
 	struct Note {
@@ -84,18 +86,33 @@ struct PlayMode : Mode {
 
 	// BPM
 	float bpm = 120.0f;
+	// starting time
+	std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
 	// current soundtrack time
 	float curr_time = 0.0f;
 	// most recent note timestamp
 	float most_recent_note_time = -1.0f;
 	// notes played
 	size_t notes_played = 0;
+	size_t current_round_played = 0;
+	size_t word_index = 0;
+	size_t current_round_bad = 0;
+	size_t gameover = false;
 
 	// Game statistics
 	int num_bad = 0;
 	int num_miss = 0;
 	int num_great = 0;
 	int num_perfect = 0;
+
+	// aesthetics
+	float press_timer = 0.0f;
+	float lightning_timer = 0.0f;
+	float enemy_fade = 1.0f;
+
+	// base pos
+	glm::vec3 player_base_pos;
+	glm::vec3 enemy_base_pos;
 };
 
 const float CIRCLE_RADIUS = 2.0f;
