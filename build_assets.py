@@ -34,6 +34,7 @@ CHART_HPP_TEMPLATE = """\
 #include <vector>
 #include <string.h>
 #include <unordered_map>
+#include <glm/glm.hpp>
 
 namespace Chart {{
 // Song BPM
@@ -52,7 +53,7 @@ std::vector<std::vector<std::string>> chart_words = {}
 // Sprite helper
 std::unordered_map<std::string, std::string> mesh_name_to_sprite = {}
 
-std::unordered_map<std::string, size_t> mesh_name_to_width = {}
+std::unordered_map<std::string, GLsizei> mesh_name_to_width = {}
 
 }}
 // FILE END

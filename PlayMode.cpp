@@ -271,10 +271,19 @@ void PlayMode::update(float elapsed) {
 			// new round
 			current_round_played = 0;
 			current_round_bad = 0;
-			size_t _curr_sel = std::clamp(static_cast<size_t>(beats_passed / 16.0f), 0ul, Chart::SONG_NUM_ROUNDS - 1);
+			// size_t _curr_sel = std::clamp(static_cast<size_t>(beats_passed / 16.0f), 0ul, Chart::SONG_NUM_ROUNDS - 1);
+			size_t _curr_sel = static_cast<size_t>(beats_passed / 16.0f);
+			if (_curr_sel > Chart::SONG_NUM_ROUNDS - 1) {
+				_curr_sel = Chart::SONG_NUM_ROUNDS - 1; 
+			}
 			word_index = std::rand() % Chart::chart_words[_curr_sel].size();
 		}
-		size_t current_section = std::clamp(static_cast<size_t>(beats_passed / 16.0f), 0ul, Chart::SONG_NUM_ROUNDS);
+		// size_t current_section = std::clamp(static_cast<size_t>(beats_passed / 16.0f), 0ul, Chart::SONG_NUM_ROUNDS);
+		size_t current_section = static_cast<size_t>(beats_passed / 16.0f);
+		if (current_section > Chart::SONG_NUM_ROUNDS) {
+			current_section = Chart::SONG_NUM_ROUNDS;
+		}
+
 		float delta_beats_passed = beats_passed - std::floor(beats_passed / 16.0f) * 16.0f;
 		if (current_section < Chart::SONG_NUM_ROUNDS && current_round_played < Chart::chart_beats[current_section].size()) {
 			if (Chart::chart_beats[current_section][current_round_played] <= delta_beats_passed) {
