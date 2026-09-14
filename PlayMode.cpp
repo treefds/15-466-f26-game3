@@ -135,7 +135,7 @@ PlayMode::PlayMode() : scene(*cave_scene) {
 	};
 
 	enemy->pipeline.set_uniforms = [this]() {
-		glUniform4fv(lit_color_texture_program->TINT_vec4, 1, glm::value_ptr(glm::vec4(1.0f, 1.0f, 1.0f, 3.0f * this->enemy_fade)));
+		glUniform4fv(lit_color_texture_program->TINT_vec4, 1, glm::value_ptr(glm::vec4(1.0f, enemy_fade, enemy_fade, 1.0f)));
 		glUniform3f(lit_color_texture_program->LIGHT_DIRECTION_vec3, 0.0f, 0.0f, 0.0f);
 	};
 
@@ -253,21 +253,11 @@ void PlayMode::update(float elapsed) {
 	wobble += elapsed / 10.0f;
 	wobble -= std::floor(wobble);
 
-	//move sound to follow leg tip position:
-	// TODO
-
 	{ //update listener to camera position:
 		glm::mat4x3 frame = camera->transform->make_parent_from_local();
 		glm::vec3 frame_right = frame[0];
 		glm::vec3 frame_at = frame[3];
 		Sound::listener.set_position_right(frame_at, frame_right, 1.0f / 60.0f);
-	}
-
-
-	{ // DEBUG: spawn a note on debug button
-		if (debug.downs > 0) {
-			add_note('a');
-		}
 	}
 
 	{ // Generate notes based on soundtrack
@@ -400,6 +390,7 @@ void PlayMode::update(float elapsed) {
 		// ememy hit?
 		enemy->transform->position.y = enemy_base_pos.y + glm::sin(lightning_timer / 0.25f * PI) * 0.07f;
 		player->transform->position.y = player_base_pos.y;
+		enemy_fade = 1.0f - glm::sin(lightning_timer / 0.25f * PI) * 0.5f;
 	}
 
 	{ // animate enemy transition
@@ -442,11 +433,11 @@ void PlayMode::draw(glm::uvec2 const &drawable_size) {
 
 	//set up light type and position for lit_color_texture_program:
 	// TODO: consider using the Light(s) in the scene to do this
-	glUseProgram(lit_color_texture_program->program);
-	glUniform1i(lit_color_texture_program->LIGHT_TYPE_int, 1);
-	glUniform3fv(lit_color_texture_program->LIGHT_DIRECTION_vec3, 1, glm::value_ptr(glm::vec3(0.0f, 0.0f,-1.0f)));
-	glUniform3fv(lit_color_texture_program->LIGHT_ENERGY_vec3, 1, glm::value_ptr(glm::vec3(1.0f, 1.0f, 0.95f)));
-	glUseProgram(0);
+	// glUseProgram(lit_color_texture_program->program);
+	// glUniform1i(lit_color_texture_program->LIGHT_TYPE_int, 1);
+	// glUniform3fv(lit_color_texture_program->LIGHT_DIRECTION_vec3, 1, glm::value_ptr(glm::vec3(0.0f, 0.0f,-1.0f)));
+	// glUniform3fv(lit_color_texture_program->LIGHT_ENERGY_vec3, 1, glm::value_ptr(glm::vec3(1.0f, 1.0f, 0.95f)));
+	// glUseProgram(0);
 
 	glClearColor(0.0f, 0.1f, 0.2f, 1.0f);
 	glClearDepth(1.0f); //1.0 is actually the default value to clear the depth buffer to, but FYI you can change it.

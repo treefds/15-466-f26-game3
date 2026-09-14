@@ -2,7 +2,7 @@
 
 **Author**: Runkun Chen (runkunc)
 
-A typing rhythm game, inspired by *PaRappa the Rapper* and typing games; mixing both into a somewhat unconventional rhythm game design.
+A typing rhythm game, inspired by *PaRappa the Rapper* and typing games; mixing both into a somewhat novel (but not that novel) game design.
 
 You are a mage fighting a slime. But to cast magic, you have to spell out words in sync with some rhythm.
 
