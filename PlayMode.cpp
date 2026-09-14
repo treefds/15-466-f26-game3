@@ -157,7 +157,7 @@ PlayMode::PlayMode() : scene(*cave_scene) {
 	}
 
 	// Random seed
-	std::srand(std::time(nullptr));
+	std::srand(static_cast<unsigned int>(std::time(nullptr)));
 	start = std::chrono::steady_clock::now();
 }
 
