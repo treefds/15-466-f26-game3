@@ -21,6 +21,16 @@ You are a mage fighting a slime. But to cast magic, you have to spell out words 
 - Game will automatically start; to replay, please restart the program.
 - If the OS is unstable (dropping a lot of frames at once), then some notes will disappear, and keys will become desynchronized.
 
+
+**How to build**:
+
+```bash
+# Recompile and play
+node Maekfile.js && ./dist/game
+# Rebuild assets (optional)
+python build_assets.py && make -C scenes
+```
+
 -----
 
 3D assets created in Blender.
